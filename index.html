@@ -1,46 +1,77 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><title>PROJECT ASHFALL – Grafik-Prototyp 0.2</title><style>*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#141e1d;color:#fff;font:14px system-ui;touch-action:none}canvas{width:100%;height:100%;display:block}#info{position:absolute;top:max(12px,env(safe-area-inset-top));left:14px;right:14px;pointer-events:none;text-shadow:0 2px 4px #000}#info b{letter-spacing:2px;color:#f0ce8d}#info small{display:block;margin-top:5px;opacity:.85}#pad{position:absolute;bottom:max(24px,env(safe-area-inset-bottom));left:24px;width:125px;height:125px;border:2px solid #fff8;background:#ffffff1c;border-radius:50%;touch-action:none}#nub{position:absolute;width:52px;height:52px;left:35px;top:35px;border-radius:50%;background:#ffffff9a;border:2px solid white}#run{position:absolute;right:24px;bottom:max(45px,env(safe-area-inset-bottom));width:84px;height:84px;border-radius:50%;background:#ae6544df;border:2px solid #f7c88c;color:white;font-weight:800;touch-action:none}#fps{position:absolute;right:15px;top:max(15px,env(safe-area-inset-top));font-size:12px}#hint{position:absolute;bottom:max(160px,env(safe-area-inset-bottom) + 140px);left:15px;right:15px;text-align:center;font-size:12px;color:#f0e6c9;text-shadow:0 2px 3px #000;pointer-events:none}</style></head><body><canvas id="c"></canvas><div id="info"><b>PROJECT ASHFALL</b><small>GRAFIKTEST 0.2 · FIGUREN & ZOMBIES · keine Spielstände verändert</small></div><div id="fps"></div><div id="hint">Feste schräge Kamera · Joystick zum Bewegen · LAUFEN für Sprint</div><div id="pad"><div id="nub"></div></div><button id="run">LAUFEN</button><script>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><title>PROJECT ASHFALL – Grafik-Prototyp 0.3</title><style>*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#141e1d;color:#fff;font:14px system-ui;touch-action:none}canvas{width:100%;height:100%;display:block}#info{position:absolute;top:max(12px,env(safe-area-inset-top));left:14px;right:14px;pointer-events:none;text-shadow:0 2px 4px #000}#info b{letter-spacing:2px;color:#f0ce8d}#info small{display:block;margin-top:5px;opacity:.85}#pad{position:absolute;bottom:max(24px,env(safe-area-inset-bottom));left:24px;width:125px;height:125px;border:2px solid #fff8;background:#ffffff1c;border-radius:50%;touch-action:none}#nub{position:absolute;width:52px;height:52px;left:35px;top:35px;border-radius:50%;background:#ffffff9a;border:2px solid white}#run{position:absolute;right:24px;bottom:max(45px,env(safe-area-inset-bottom));width:84px;height:84px;border-radius:50%;background:#ae6544df;border:2px solid #f7c88c;color:white;font-weight:800;touch-action:none}#fps{position:absolute;right:15px;top:max(15px,env(safe-area-inset-top));font-size:12px}#hint{position:absolute;bottom:max(160px,env(safe-area-inset-bottom) + 140px);left:15px;right:15px;text-align:center;font-size:12px;color:#f0e6c9;text-shadow:0 2px 3px #000;pointer-events:none}</style></head><body><canvas id="c"></canvas><div id="info"><b>PROJECT ASHFALL</b><small>GRAFIKTEST 0.3 · MENSCH & EIN ZOMBIE · keine Spielstände verändert</small></div><div id="fps"></div><div id="hint">Ein langsamer Zombie verfolgt dich · Joystick · LAUFEN</div><div id="pad"><div id="nub"></div></div><button id="run">LAUFEN</button><script>
 'use strict';const canvas=document.getElementById('c'),ctx=canvas.getContext('2d',{alpha:false}),pad=document.getElementById('pad'),nub=document.getElementById('nub'),run=document.getElementById('run'),fps=document.getElementById('fps');let W=0,H=0,dpr=1,moveX=0,moveY=0,sprint=false,joyId=null,px=0,py=0,last=performance.now(),frames=0,fpsTime=last,displayFps=0;function resize(){dpr=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;canvas.width=Math.round(W*dpr);canvas.height=Math.round(H*dpr);ctx.setTransform(dpr,0,0,dpr,0,0)}addEventListener('resize',resize);resize();
 function joy(e){const r=pad.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,dx=e.clientX-cx,dy=e.clientY-cy,m=Math.hypot(dx,dy),f=Math.min(1,m/43),a=Math.atan2(dy,dx);moveX=Math.cos(a)*f;moveY=Math.sin(a)*f;nub.style.transform=`translate(${moveX*37}px,${moveY*37}px)`}pad.addEventListener('pointerdown',e=>{joyId=e.pointerId;pad.setPointerCapture(joyId);joy(e)});pad.addEventListener('pointermove',e=>{if(e.pointerId===joyId)joy(e)});function release(e){if(e.pointerId!==joyId)return;joyId=null;moveX=moveY=0;nub.style.transform='translate(0,0)'}pad.addEventListener('pointerup',release);pad.addEventListener('pointercancel',release);run.addEventListener('pointerdown',e=>{run.setPointerCapture(e.pointerId);sprint=true});for(const ev of ['pointerup','pointercancel','lostpointercapture'])run.addEventListener(ev,()=>sprint=false);let keys={};addEventListener('keydown',e=>keys[e.key.toLowerCase()]=true);addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
-const buildings=[{x:-480,y:-330,w:270,h:195,hgt:105,wall:'#9b9985',roof:'#625f5b'},{x:250,y:-370,w:250,h:205,hgt:95,wall:'#96917c',roof:'#696451'},{x:-460,y:210,w:250,h:210,hgt:110,wall:'#898f83',roof:'#56645d'},{x:290,y:240,w:230,h:180,hgt:90,wall:'#9e8974',roof:'#6b5d50'}];let seed=1337;function rnd(){seed=(seed*1664525+1013904223)>>>0;return seed/4294967296}const decor=[];for(let i=0;i<110;i++){const x=(rnd()-.5)*1850,y=(rnd()-.5)*1550;if(Math.abs(x)<120||Math.abs(y)<95)continue;if(buildings.some(b=>x>b.x-30&&x<b.x+b.w+30&&y>b.y-30&&y<b.y+b.h+30))continue;decor.push({x,y,type:rnd()<.45?'tree':rnd()<.55?'rock':'bush',scale:.75+rnd()*.7})}const zombies=[{x:130,y:-110},{x:-190,y:140},{x:530,y:130},{x:-540,y:-80}];const car={x:-45,y:-180};
+const buildings=[{x:-480,y:-330,w:270,h:195,hgt:105,wall:'#9b9985',roof:'#625f5b'},{x:250,y:-370,w:250,h:205,hgt:95,wall:'#96917c',roof:'#696451'},{x:-460,y:210,w:250,h:210,hgt:110,wall:'#898f83',roof:'#56645d'},{x:290,y:240,w:230,h:180,hgt:90,wall:'#9e8974',roof:'#6b5d50'}];let seed=1337;function rnd(){seed=(seed*1664525+1013904223)>>>0;return seed/4294967296}const decor=[];for(let i=0;i<110;i++){const x=(rnd()-.5)*1850,y=(rnd()-.5)*1550;if(Math.abs(x)<120||Math.abs(y)<95)continue;if(buildings.some(b=>x>b.x-30&&x<b.x+b.w+30&&y>b.y-30&&y<b.y+b.h+30))continue;decor.push({x,y,type:rnd()<.45?'tree':rnd()<.55?'rock':'bush',scale:.75+rnd()*.7})}const zombies=[{x:175,y:-110,face:0,walk:0}];const car={x:-45,y:-180};
 // Fixed angled projection: ground coordinates are rotated and vertically compressed.
 const A=Math.PI/4,cs=Math.cos(A),sn=Math.sin(A),tilt=.58;let scale=1,ox=0,oy=0;function project(x,y,z=0){const dx=x-px,dy=y-py;return {x:ox+(dx*cs-dy*sn)*scale,y:oy+((dx*sn+dy*cs)*tilt-z)*scale}}function polygon(points,color,stroke){ctx.beginPath();points.forEach((p,i)=>{const q=project(...p);i?ctx.lineTo(q.x,q.y):ctx.moveTo(q.x,q.y)});ctx.closePath();ctx.fillStyle=color;ctx.fill();if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=1;ctx.stroke()}}function line(points,color,width=1){ctx.beginPath();points.forEach((p,i)=>{const q=project(...p);i?ctx.lineTo(q.x,q.y):ctx.moveTo(q.x,q.y)});ctx.strokeStyle=color;ctx.lineWidth=width*scale;ctx.stroke()}function box(x,y,w,h,z,c,top,shade){polygon([[x,y,0],[x+w,y,0],[x+w,y+h,0],[x,y+h,0]],'#20292455');polygon([[x,y,0],[x+w,y,0],[x+w,y,z],[x,y,z]],shade||'#6e7568');polygon([[x+w,y,0],[x+w,y+h,0],[x+w,y+h,z],[x+w,y,z]],c);polygon([[x,y+h,0],[x+w,y+h,0],[x+w,y+h,z],[x,y+h,z]],c);polygon([[x,y,z],[x+w,y,z],[x+w,y+h,z],[x,y+h,z]],top,'#ffffff18')}
 function house(b){box(b.x,b.y,b.w,b.h,b.hgt,b.wall,b.roof,'#74766b');polygon([[b.x-9,b.y-9,b.hgt],[b.x+b.w+9,b.y-9,b.hgt],[b.x+b.w+9,b.y+b.h+9,b.hgt],[b.x-9,b.y+b.h+9,b.hgt]],b.roof,'#2b342c');const dx=b.x+b.w*.43;polygon([[dx,b.y+b.h+1,0],[dx+44,b.y+b.h+1,0],[dx+44,b.y+b.h+1,69],[dx,b.y+b.h+1,69]],'#393d38');polygon([[b.x+35,b.y+b.h+2,36],[b.x+88,b.y+b.h+2,36],[b.x+88,b.y+b.h+2,72],[b.x+35,b.y+b.h+2,72]],'#799a9a','#343c37')}
 function tree(o){const {x,y}=o,s=o.scale;box(x-7*s,y-7*s,14*s,14*s,47*s,'#594b38','#665540');polygon([[x-38*s,y-28*s,43*s],[x+33*s,y-25*s,43*s],[x+45*s,y+30*s,43*s],[x-35*s,y+30*s,43*s]],'#364d3c');polygon([[x-31*s,y-24*s,72*s],[x+25*s,y-19*s,72*s],[x+34*s,y+23*s,72*s],[x-29*s,y+23*s,72*s]],'#45624a');polygon([[x-18*s,y-14*s,91*s],[x+16*s,y-13*s,91*s],[x+20*s,y+17*s,91*s],[x-16*s,y+17*s,91*s]],'#567452')}
-// Animated low-poly survivors and zombie silhouettes. Geometry stays lightweight for iPhone Safari.
+// Lightweight articulated 2.5D figures, with solid tapered limbs rather than columns.
 let worldTime=0,playerFacing=1,playerMoving=false;
-const zombieLooks=[{shirt:'#6d7b62',pants:'#454a45',skin:'#9eae8b',hair:'#4d4a38',phase:0},{shirt:'#8b6259',pants:'#4b5055',skin:'#91a38c',hair:'#555149',phase:1.9},{shirt:'#627887',pants:'#535049',skin:'#a5ad91',hair:'#4a4137',phase:3.4},{shirt:'#837968',pants:'#3e4542',skin:'#879a7e',hair:'#393d36',phase:5.1}];
-function limb(x,y,z,dx,dy,w,h,col){box(x-w/2,y-h/2,w,h,z,col,col,'#29312e')}
-function person(x,y,shirt,skin='#c8ab8b',size=1,opts={}){
- const zombie=!!opts.zombie,phase=opts.phase||0,moving=opts.moving!==false;
- const stride=moving?Math.sin(worldTime*(zombie?3.6:10.5)+phase):0;
- const sway=moving?Math.sin(worldTime*(zombie?3.6:10.5)+phase)*2.8*size:0;
- const s=size,face=opts.face||1,pants=opts.pants||'#38464d',hair=opts.hair||'#36372f';
- const headX=x+(zombie?3:0)*s,lean=zombie?5*s:0;
- ctx.save();const shadow=project(x,y,1);ctx.fillStyle='#111a1699';ctx.beginPath();ctx.ellipse(shadow.x,shadow.y+4*scale,17*s*scale,8*s*scale,0,0,Math.PI*2);ctx.fill();ctx.restore();
- // Boots and individually swinging trouser legs.
- for(const side of [-1,1]){
-  const legX=x+side*5.4*s+stride*side*4.2*s;
-  const legY=y+side*1.2*s+stride*side*2.8*s;
-  box(legX-3.4*s,legY-3.3*s,6.8*s,7*s,20*s,pants,'#52605b');
-  box(legX-4*s,legY+1*s,8*s,9*s,6*s,'#292e2d','#343a37');
- }
- // Arms hang separately from the torso and swing opposite the legs.
- for(const side of [-1,1]){
-  const ax=x+side*12*s+lean*.4,ay=y+stride*side*3.2*s;
-  box(ax-3.3*s,ay-3*s,6.6*s,7*s,(zombie?27:29)*s+(zombie?0:sway*.35),shirt,shirt);
-  box(ax-3*s,ay-3*s,6*s,6*s,(zombie?16:17)*s+(zombie?0:sway*.35),skin,skin);
- }
- // Vest, jacket seam and collar.
- box(x-9*s+lean*.25,y-7*s,18*s,14*s,45*s,shirt,shirt,'#293b36');
- box(x-2*s+lean*.25,y-7.5*s,3*s,15*s,46*s,zombie?'#53564a':'#e1b17a',zombie?'#53564a':'#e1b17a');
- box(headX-5.8*s,y-5.8*s,11.6*s,11.6*s,57*s,skin,skin);
- box(headX-6.5*s,y-6.5*s,13*s,13*s,65*s,hair,hair);
- // Face plane, nose and eyes readable from the fixed angled camera.
- box(headX-5*s,y+3.8*s,10*s,2.5*s,59*s,skin,skin);
- for(const side of [-1,1])box(headX+side*3*s-1.1*s,y+6*s,2.2*s,1.7*s,60*s,zombie?'#4b3936':'#272b29','#272b29');
- if(zombie){box(x-8*s,y+6.5*s,6*s,1.4*s,40*s,'#573e38','#573e38');}
- else {box(x-9.5*s,y-7.5*s,19*s,2*s,48*s,'#e1b17a','#e1b17a');}
+function cuboid(x,y,z,w,d,h,front,side,top){
+ const X=x-w/2,Y=y-d/2;
+ polygon([[X,Y,z],[X+w,Y,z],[X+w,Y,z+h],[X,Y,z+h]],side);
+ polygon([[X+w,Y,z],[X+w,Y+d,z],[X+w,Y+d,z+h],[X+w,Y,z+h]],side);
+ polygon([[X,Y+d,z],[X+w,Y+d,z],[X+w,Y+d,z+h],[X,Y+d,z+h]],front);
+ polygon([[X,Y,z+h],[X+w,Y,z+h],[X+w,Y+d,z+h],[X,Y+d,z+h]],top||front);
 }
-function draw(){ctx.fillStyle='#52634d';ctx.fillRect(0,0,W,H);scale=Math.max(.48,Math.min(.9,W/480));ox=W*.5;oy=H*.49;const area=1200;polygon([[-area,-area,0],[area,-area,0],[area,area,0],[-area,area,0]],'#617158');polygon([[-area,-76,1],[area,-76,1],[area,76,1],[-area,76,1]],'#5e5f5b');polygon([[-80,-area,1],[80,-area,1],[80,area,1],[-80,area,1]],'#5e5f5b');for(let t=-1100;t<=1100;t+=90){line([[t,-3,2],[t+45,-3,2]],'#b5b0a077',3);line([[-3,t,2],[-3,t+45,2]],'#b5b0a077',3)}const objects=[];for(const b of buildings)objects.push({depth:b.x+b.y+b.w+b.h,fn:()=>house(b)});for(const o of decor)objects.push({depth:o.x+o.y,fn:()=>{if(o.type==='tree')tree(o);else if(o.type==='rock')box(o.x-11,o.y-8,23,17,9,'#777c72','#a4a69a');else box(o.x-17,o.y-14,34,28,16,'#456747','#527b50')}});objects.push({depth:car.x+car.y+110,fn:()=>{box(car.x,car.y,105,52,21,'#704d45','#a76650');box(car.x+21,car.y+7,60,38,36,'#677c7c','#7c9999')}});for(const z of zombies)objects.push({depth:z.x+z.y,fn:()=>{const i=zombies.indexOf(z),v=zombieLooks[i%zombieLooks.length];person(z.x,z.y,v.shirt,v.skin,.98,{zombie:true,pants:v.pants,hair:v.hair,phase:v.phase})}});objects.push({depth:px+py,fn:()=>person(px,py,'#c78b4e','#d8b696',1.08,{moving:playerMoving,phase:0,pants:'#38454d',hair:'#403b30',face:playerFacing})});objects.sort((a,b)=>a.depth-b.depth);for(const o of objects)o.fn();const center=project(px,py,0);ctx.beginPath();ctx.ellipse(center.x,center.y+2,15*scale,8*scale,0,0,Math.PI*2);ctx.strokeStyle='#f7d99a';ctx.lineWidth=2;ctx.stroke()}
-function tick(now){const dt=Math.min(.05,(now-last)/1000);last=now;worldTime+=dt;let mx=moveX,my=moveY;if(keys.w||keys.arrowup)my-=1;if(keys.s||keys.arrowdown)my+=1;if(keys.a||keys.arrowleft)mx-=1;if(keys.d||keys.arrowright)mx+=1;const len=Math.hypot(mx,my);playerMoving=len>.05;if(playerMoving){playerFacing=mx>=0?1:-1;mx/=Math.max(1,len);my/=Math.max(1,len);const speed=sprint||keys.shift?230:130;const dx=(mx*cs+my*sn)*speed*dt,dy=(-mx*sn+my*cs)*speed*dt;const nx=px+dx,ny=py+dy;const blocked=(x,y)=>buildings.some(b=>x>b.x-15&&x<b.x+b.w+15&&y>b.y-15&&y<b.y+b.h+15);if(!blocked(nx,py))px=nx;if(!blocked(px,ny))py=ny}draw();frames++;if(now-fpsTime>=900){displayFps=Math.round(frames*1000/(now-fpsTime));fps.textContent=displayFps+' FPS';frames=0;fpsTime=now}requestAnimationFrame(tick)}requestAnimationFrame(tick);
+function segment(ax,ay,az,bx,by,bz,width,color,highlight){
+ // Connected joints create limbs that bend visibly while walking.
+ const vx=bx-ax,vy=by-ay,vz=bz-az,L=Math.hypot(vx,vy)||1;
+ const nx=-vy/L*width/2,ny=vx/L*width/2;
+ polygon([[ax+nx,ay+ny,az],[ax-nx,ay-ny,az],[bx-nx,by-ny,bz],[bx+nx,by+ny,bz]],color);
+ polygon([[ax+nx,ay+ny,az],[ax+nx,ay+ny,az+width*.58],[bx+nx,by+ny,bz+width*.58],[bx+nx,by+ny,bz]],highlight||color);
+}
+function figure(x,y,zombie=false,walking=false,phase=0){
+ const s=zombie?1.02:1.08;
+ const cycle=worldTime*(zombie?3.1:9.5)+phase;
+ const swing=walking?Math.sin(cycle):0;
+ const bob=walking?Math.abs(Math.sin(cycle))*1.3:0;
+ const skin=zombie?'#a4b39a':'#d4b193';
+ const shirt=zombie?'#677667':'#c98a4b';
+ const pants=zombie?'#484c47':'#354750';
+ const boot='#282d2c',lean=zombie?5:0;
+ const shadow=project(x,y,0);ctx.fillStyle='#15201988';ctx.beginPath();ctx.ellipse(shadow.x,shadow.y+3*scale,16*s*scale,7*s*scale,0,0,Math.PI*2);ctx.fill();
+ // Each boot, shin and thigh is a distinct articulated piece.
+ for(const side of [-1,1]){
+  const hip=x+side*6*s,hy=y;
+  const footY=y+side*swing*6*s,footX=x+side*7*s+side*swing*4*s;
+  const kneeX=(hip+footX)/2+side*1.5*s,kneeY=y+side*swing*2*s;
+  segment(hip,hy,31*s+bob,kneeX,kneeY,19*s+bob,7*s,pants,'#52616a');
+  segment(kneeX,kneeY,19*s+bob,footX,footY,6*s,6.6*s,pants,'#45525b');
+  cuboid(footX,footY+3*s,3*s,9*s,12*s,6*s,boot,'#1e2323','#424440');
+ }
+ // Jacket tapers from shoulders to waist, with a readable neckline and vest panels.
+ const shoulderZ=49*s+bob,waistZ=31*s+bob;
+ polygon([[x-12*s,y-5*s,shoulderZ],[x+12*s,y-5*s,shoulderZ],[x+9*s,y+6*s,waistZ],[x-9*s,y+6*s,waistZ]],'#8a573a');
+ polygon([[x-12*s,y+5*s,shoulderZ],[x+12*s,y+5*s,shoulderZ],[x+9*s,y+8*s,waistZ],[x-9*s,y+8*s,waistZ]],shirt);
+ cuboid(x,y,waistZ,18*s,13*s,18*s,shirt,'#8d6046','#d19c64');
+ cuboid(x,y+7*s,waistZ+9*s,2*s,1.2*s,16*s,zombie?'#4b5b4d':'#6d4935','#6d4935');
+ // Separate upper arms, elbows and forearms; zombie holds arms forward.
+ for(const side of [-1,1]){
+  const sx=x+side*13*s,sy=y,elx=x+side*17*s,ely=y+(zombie?10:side*swing*4)*s;
+  const handX=x+side*(zombie?15:17)*s,handY=y+(zombie?23:side*swing*8)*s;
+  segment(sx,sy,47*s+bob,elx,ely,(zombie?39:35)*s+bob,7.5*s,shirt,'#b67e51');
+  segment(elx,ely,(zombie?39:35)*s+bob,handX,handY,(zombie?33:22)*s+bob,6.5*s,skin,zombie?'#829b82':'#e0bd9e');
+  cuboid(handX,handY,(zombie?31:20)*s+bob,6*s,7*s,7*s,skin,'#9b8b75');
+ }
+ // Neck, jaw, ears, hair, nose and eye line are separate from the torso.
+ cuboid(x,y,49*s+bob,7*s,7*s,6*s,skin,'#a88971');
+ cuboid(x+lean*s,y,55*s+bob,14*s,13*s,15*s,skin,'#a78e79','#ddbaa0');
+ cuboid(x+lean*s,y-2*s,67*s+bob,15*s,12*s,5*s,zombie?'#514f45':'#37392f','#33362d');
+ cuboid(x+lean*s,y+7*s,58*s+bob,5*s,3*s,4*s,zombie?'#7d9380':'#c49b7d','#a88b77');
+ for(const side of [-1,1])cuboid(x+(lean+side*4)*s,y+7.5*s,62*s+bob,2.4*s,1.4*s,2*s,zombie?'#5d3332':'#292b2a','#292b2a');
+ if(zombie){
+  // Ragged shirt, exposed forearms and dark mouth make the lone enemy distinct.
+  polygon([[x-8*s,y+8*s,35*s],[x-2*s,y+8*s,31*s],[x+5*s,y+8*s,36*s],[x+10*s,y+8*s,32*s],[x+10*s,y+8*s,38*s],[x-8*s,y+8*s,38*s]],'#4c5a4d');
+  cuboid(x+lean*s,y+8.5*s,54*s+bob,6*s,1.5*s,2.5*s,'#593b3a','#593b3a');
+ }else{
+  // Backpack with visible shoulder straps, practical survival outfit.
+  cuboid(x,y-9*s,34*s+bob,16*s,7*s,17*s,'#4b5943','#344235','#63714e');
+  for(const side of [-1,1])cuboid(x+side*7*s,y+6*s,36*s+bob,2*s,2*s,12*s,'#73593c','#73593c');
+ }
+}
+function draw(){ctx.fillStyle='#52634d';ctx.fillRect(0,0,W,H);scale=Math.max(.48,Math.min(.9,W/480));ox=W*.5;oy=H*.49;const area=1200;polygon([[-area,-area,0],[area,-area,0],[area,area,0],[-area,area,0]],'#617158');polygon([[-area,-76,1],[area,-76,1],[area,76,1],[-area,76,1]],'#5e5f5b');polygon([[-80,-area,1],[80,-area,1],[80,area,1],[-80,area,1]],'#5e5f5b');for(let t=-1100;t<=1100;t+=90){line([[t,-3,2],[t+45,-3,2]],'#b5b0a077',3);line([[-3,t,2],[-3,t+45,2]],'#b5b0a077',3)}const objects=[];for(const b of buildings)objects.push({depth:b.x+b.y+b.w+b.h,fn:()=>house(b)});for(const o of decor)objects.push({depth:o.x+o.y,fn:()=>{if(o.type==='tree')tree(o);else if(o.type==='rock')box(o.x-11,o.y-8,23,17,9,'#777c72','#a4a69a');else box(o.x-17,o.y-14,34,28,16,'#456747','#527b50')}});objects.push({depth:car.x+car.y+110,fn:()=>{box(car.x,car.y,105,52,21,'#704d45','#a76650');box(car.x+21,car.y+7,60,38,36,'#677c7c','#7c9999')}});for(const z of zombies)objects.push({depth:z.x+z.y,fn:()=>figure(z.x,z.y,true,true,z.walk)});objects.push({depth:px+py,fn:()=>figure(px,py,false,playerMoving,0)});objects.sort((a,b)=>a.depth-b.depth);for(const o of objects)o.fn();const center=project(px,py,0);ctx.beginPath();ctx.ellipse(center.x,center.y+2,15*scale,8*scale,0,0,Math.PI*2);ctx.strokeStyle='#f7d99a';ctx.lineWidth=2;ctx.stroke()}
+function tick(now){const dt=Math.min(.05,(now-last)/1000);last=now;worldTime+=dt;let mx=moveX,my=moveY;if(keys.w||keys.arrowup)my-=1;if(keys.s||keys.arrowdown)my+=1;if(keys.a||keys.arrowleft)mx-=1;if(keys.d||keys.arrowright)mx+=1;const len=Math.hypot(mx,my);playerMoving=len>.05;if(playerMoving){playerFacing=mx>=0?1:-1;mx/=Math.max(1,len);my/=Math.max(1,len);const speed=sprint||keys.shift?230:130;const dx=(mx*cs+my*sn)*speed*dt,dy=(-mx*sn+my*cs)*speed*dt;const nx=px+dx,ny=py+dy;const blocked=(x,y)=>buildings.some(b=>x>b.x-15&&x<b.x+b.w+15&&y>b.y-15&&y<b.y+b.h+15);if(!blocked(nx,py))px=nx;if(!blocked(px,ny))py=ny}// One slow zombie follows the survivor, keeping its distance from solid buildings.
+ for(const z of zombies){const dx=px-z.x,dy=py-z.y,dist=Math.hypot(dx,dy);if(dist>32&&dist<850){const step=Math.min(dist-32,31*dt);const nx=z.x+dx/dist*step,ny=z.y+dy/dist*step;const blocked=(x,y)=>buildings.some(b=>x>b.x-17&&x<b.x+b.w+17&&y>b.y-17&&y<b.y+b.h+17);if(!blocked(nx,z.y))z.x=nx;if(!blocked(z.x,ny))z.y=ny;z.walk+=dt*.13;}}draw();frames++;if(now-fpsTime>=900){displayFps=Math.round(frames*1000/(now-fpsTime));fps.textContent=displayFps+' FPS';frames=0;fpsTime=now}requestAnimationFrame(tick)}requestAnimationFrame(tick);
 </script></body></html>
